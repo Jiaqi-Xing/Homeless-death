@@ -22,7 +22,6 @@ library(knitr)
 library(readr)
 cleaned_death_by_month_data <- read_csv("~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_month_data.csv")
 cleaned_death_by_cause_data <- read_csv("~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_cause_data.csv")
-death_by_cause_data <- read_csv("~/sta304/starter_folder-main/data/analysis_data/death_by_cause_data.csv")
 combined_deaths <- read_csv("~/sta304/starter_folder-main/data/analysis_data/deaths_over_time.csv")
 ```
 
