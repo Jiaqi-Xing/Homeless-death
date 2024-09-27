@@ -33,7 +33,7 @@ This study examines the factors contributing to the deaths of homeless individua
 
 Drug toxicity was the primary cause of death between 2017 and 2023, accounting for about 58% of known causes. During the pandemic, deaths related to drug use surged, and the underlying reasons for this will be explored later. These findings emphasize the critical need to address substance abuse in homeless populations, particularly during periods of increased isolation and reduced access to social services.
 
-The remainder of this paper is structured as follows: @sec-intro-dataset provides an overview of the raw data set. @sec-variables introduces variables in the cleaned data, and these variables will be used in the visualization. @sec-result presents visualizations of data with explanation of findings from them. Finally, @sec-discussion examines the possible reasons of a surge in drug-caused deaths during epidemic, limitations and next steps.
+The remainder of this paper is structured as follows: @sec-intro-dataset provides an overview of the raw data set. @sec-variables introduces variables in the cleaned data, and these variables will be used in the visualization. @sec-result presents visualizations of data with explanation of findings from them. Finally, @sec-discussion examines the possible reasons of surge in drug-caused deaths during epidemic, limitations and next steps.
 
 # Data {#sec-data}
 
@@ -159,7 +159,7 @@ In contrast, the red line (deaths due to unknown causes) shows a different patte
 
 Overall, this graph alleviates concerns about COVID-19 deaths being overlooked and demonstrates that drug use was the leading cause of death, driving the surge in mortality during the pandemic.
 
-# Discussion{@sec-discussion}
+# Discussion{#sec-discussion}
 
 ## possible reasons of surge in drug-caused deaths during epidemic {#sec-first-point}
 Two factors likely contributed to the increase in deaths due to drug poisoning during the COVID-19 pandemic. 
