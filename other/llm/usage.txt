@@ -624,14 +624,593 @@ face = "bold": Makes the title bold. Other options include "italic" and "bold.it
 hjust = 0.5: Centers the title horizontally. hjust = 0 aligns left, and hjust = 1 aligns right.
 This should help you adjust the size and appearance of your graph titles! Let me know if you need further details.
 
+User
+(a graph)write an analysis for this
+
+ChatGPT
+Analysis of Figure 2: Distribution of Homeless Deaths by Cause (2017-2023)
+Figure 2 illustrates the distribution of homeless deaths by cause between 2017 and 2023. The data shows a clear disparity in the causes of death, with Drug Toxicity being the leading cause by a significant margin, accounting for 458 deaths, far outstripping all other causes. This emphasizes the critical impact of substance use on the homeless population during this period.
+
+The next notable cause is Unknown with 225 deaths, indicating a large portion of cases where the specific cause of death could not be determined. This highlights the challenges in accurately tracking and reporting homeless mortality data, possibly due to inadequate health care access and post-mortem analysis in vulnerable populations.
+
+Other significant causes include:
+
+Cardiovascular Disease at 104 deaths, reflecting common health conditions that may be exacerbated by homelessness.
+Suicide at 30 deaths, revealing mental health as another serious concern within the homeless community.
+Pneumonia at 50 deaths, a condition often related to poor living conditions and lack of adequate shelter.
+Smaller causes include Homicide (21 deaths), Infection (10 deaths), and Accident (43 deaths), which also reflect the harsh living environments faced by homeless individuals.
+
+Interestingly, COVID-19 accounts for only 8 deaths, likely due to a variety of factors including reporting inconsistencies or unique challenges faced by homeless populations in accessing healthcare during the pandemic.
+
+In conclusion, this figure clearly shows that drug-related fatalities are a major concern for homeless populations, followed by unknown causes, cardiovascular disease, and mental health challenges. It emphasizes the need for targeted interventions addressing substance use, mental health, and healthcare access for homeless individuals.
+
+User
+Mention that the low number of COVID-19-caused deaths and the high number of unknown-caused deaths might make people doubt that COVID-19-caused death haven't been reported correctly and be underestimated, and further doubt the statement in the previous paper that the surge deaths during pandemic is not derived by virus, but drug overdoses instead
+
+ChatGPT
+Analysis of Figure 2: Distribution of Homeless Deaths by Cause (2017-2023)
+Figure 2 clearly shows that Drug Toxicity is the leading cause of death among the homeless population, accounting for 458 deaths between 2017 and 2023, significantly more than any other cause. This reinforces the conclusion that drug overdoses are the primary cause of death within this group.
+
+However, the low number of COVID-19-related deaths (8 deaths) and the high number of deaths labeled as "Unknown" (225 deaths) raise concerns about possible underreporting of COVID-19 as a cause of death. This discrepancy might lead to doubts that COVID-19 deaths among the homeless may have been underestimated. It also brings into question the assertion from previous studies that the surge in deaths during the pandemic was primarily driven by drug overdoses rather than the virus itself. The high number of "Unknown" deaths suggests a need for more precise reporting to fully understand the pandemic's impact on homeless mortality.
+
+Overall, while drug toxicity remains the leading cause, these uncertainties around COVID-19 and unknown causes suggest further investigation is needed.
+
+User
+(Three screenshots of tables) Combine these three tables.
+
+ChatGPT
+To combine these three tables and calculate the percentage of deaths from drug toxicity and unknown causes relative to the total deaths, you can follow the steps below. I'll use left_join() to merge the tables and mutate() to calculate the percentages.
+
+Combining and Mutating the Data:
+r
+Copy code
+# Assuming you have three data frames: drug_deaths, unknown_deaths, total_deaths_by_year
+
+# Merge the data frames by 'year_of_death'
+combined_deaths <- total_deaths_by_year %>%
+  left_join(drug_deaths, by = "year_of_death") %>%
+  left_join(unknown_deaths, by = "year_of_death") %>%
+  mutate(drug_death_percentage = yearly_drug_deaths / yearly_total_deaths * 100,
+         unknown_death_percentage = yearly_unknown_deaths / yearly_total_deaths * 100)
+
+# View the result
+print(combined_deaths)
+Explanation:
+left_join(): We merge the data frames based on the common column year_of_death.
+mutate(): We calculate the percentage of deaths due to drug toxicity and unknown causes as a proportion of the total deaths.
+drug_death_percentage: The percentage of deaths due to drug toxicity relative to the total deaths.
+unknown_death_percentage: The percentage of deaths due to unknown causes relative to the total deaths.
+Output:
+The resulting data frame will include columns for:
+
+year_of_death
+yearly_total_deaths
+yearly_drug_deaths
+yearly_unknown_deaths
+drug_death_percentage
+unknown_death_percentage
+This should give you a clear view of the percentage of deaths caused by drug toxicity and unknown causes each year.
+
+Let me know if you need further help!
+
+User
+draw a graph for this table 
+
+ChatGPT
+To draw a graph for this combined table with percentages of deaths from drug toxicity and unknown causes, you can use ggplot2. A good way to visualize this would be a line graph showing the trends over time for both drug toxicity deaths and unknown deaths as a percentage of total deaths.
+
+Here's the code to generate that graph:
+
+Example Code:
+r
+Copy code
+library(ggplot2)
+
+# Assuming 'combined_deaths' is the data frame with year, drug_death_percentage, and unknown_death_percentage
+
+# Convert data to long format for easier plotting with ggplot2
+library(tidyr)
+long_deaths <- combined_deaths %>%
+  pivot_longer(cols = c(drug_death_percentage, unknown_death_percentage), 
+               names_to = "cause_of_death", 
+               values_to = "percentage")
+
+# Create the line plot
+ggplot(long_deaths, aes(x = year_of_death, y = percentage, color = cause_of_death, group = cause_of_death)) +
+  geom_line(size = 1.2) +  # Draw the lines
+  geom_point(size = 3) +  # Add points for better visibility
+  labs(title = "Percentage of Deaths by Cause Over Time",
+       x = "Year",
+       y = "Percentage of Total Deaths",
+       color = "Cause of Death") +  # Label the legend
+  theme_minimal() +
+  scale_color_manual(values = c("drug_death_percentage" = "blue", 
+                                "unknown_death_percentage" = "red"))  # Customize the colors
+Explanation:
+pivot_longer(): This reshapes the data from wide format (with separate columns for each cause of death) into long format, which is easier to use for plotting with ggplot2. This will make drug_death_percentage and unknown_death_percentage appear as different categories in a single column.
+
+geom_line(): Creates a line plot for both drug deaths and unknown deaths.
+
+geom_point(): Adds points at each data point to improve visibility.
+
+scale_color_manual(): Specifies different colors for the two causes of death.
+
+Result:
+This will create a graph with the percentage of deaths from drug toxicity and unknown causes over time, with each cause represented by a different colored line.
+
+Let me know if you'd like further customization!
+
+User
+no drug_death_percentage
+
+ChatGPT
+If you don't want to calculate percentages and simply want to plot the total yearly deaths for both Drug Toxicity and Unknown Causes alongside the total deaths, you can modify the code to display the actual values of deaths over time instead of percentages.
+
+Here’s how to create a graph showing the yearly drug deaths, yearly unknown deaths, and yearly total deaths over time:
+
+Code for Plotting Yearly Deaths:
+r
+Copy code
+library(ggplot2)
+library(tidyr)
+
+# Assuming 'combined_deaths' is the data frame with 'yearly_total_deaths', 'yearly_drug_deaths', and 'yearly_unknown_deaths'
+
+# Convert data to long format for easier plotting with ggplot2
+long_deaths <- combined_deaths %>%
+  pivot_longer(cols = c(yearly_drug_deaths, yearly_unknown_deaths, yearly_total_deaths), 
+               names_to = "cause_of_death", 
+               values_to = "total_deaths")
+
+# Create the line plot for actual deaths (no percentages)
+ggplot(long_deaths, aes(x = year_of_death, y = total_deaths, color = cause_of_death, group = cause_of_death)) +
+  geom_line(size = 1.2) +  # Draw the lines
+  geom_point(size = 3) +  # Add points for better visibility
+  labs(title = "Yearly Deaths by Cause Over Time",
+       x = "Year",
+       y = "Total Deaths",
+       color = "Cause of Death") +  # Label the legend
+  theme_minimal() +
+  scale_color_manual(values = c("yearly_drug_deaths" = "blue", 
+                                "yearly_unknown_deaths" = "red",
+                                "yearly_total_deaths" = "green"))  # Customize the colors
+Explanation:
+pivot_longer(): This reshapes the data to have a single column for the number of deaths (total_deaths), and a column (cause_of_death) that specifies whether the deaths are from drug toxicity, unknown causes, or the total deaths for each year.
+
+geom_line(): Plots lines for each category of death (drug deaths, unknown deaths, and total deaths).
+
+scale_color_manual(): Assigns specific colors to each category (drug deaths, unknown deaths, total deaths). You can customize the colors as per your preference.
+
+Result:
+This will create a graph showing the total yearly deaths for drug toxicity, unknown causes, and the overall total deaths over time, with each represented by a different colored line.
+
+Let me know if you need further adjustments or additional features!
+
+User
+talk about that the green and blue line generally have same trend, while red line keep increasing after the pandemic, means there is no evidence show that unknown causes are the COVID-19 that not been reported. There might be other underlying possible factor we haven't find out yet.
+
+ChatGPT
+Revised Analysis of Figure 3: Trends in Homeless Deaths (2017–2023)
+Figure 3 shows the yearly trends in homeless deaths from 2017 to 2023, comparing deaths due to Drug Toxicity, Unknown Causes, and the Total Deaths.
+
+The green line (total deaths) and the blue line (deaths due to drug toxicity) follow a similar trend throughout the period. Both rise significantly from 2019, peak in 2021, and then decline. This close correlation suggests that drug toxicity has been a primary driver of the overall mortality trend in the homeless population, especially during the peak in 2021.
+
+In contrast, the red line (deaths due to unknown causes) shows a different pattern. It continues to increase steadily after the pandemic period, reaching its highest point in 2023 with 56 deaths. This divergence from the total deaths and drug toxicity trends implies that the rise in unknown causes is not simply due to unreported COVID-19 cases, as might be suspected. If COVID-19 deaths had been underreported in this category, we would expect a similar spike in 2020-2021 as seen in the total and drug-related deaths. Instead, the consistent increase suggests there may be other unidentified factors contributing to these unknown deaths.
+
+This steady post-pandemic rise in unknown deaths indicates that there may be additional, underlying causes yet to be fully understood or accurately recorded. Further investigation is needed to identify these factors, as they may not be related to the pandemic or drug toxicity but rather other health or environmental issues affecting the homeless population.
+
+In conclusion, while drug toxicity remains a major contributor to overall homeless deaths, the increasing trend of unknown causes points to other possible factors that have yet to be identified. This requires more focused attention on the causes behind the rise in unknown deaths, beyond the influence of the pandemic.
+
+User
+discussion : 
+1. limitation of data 
+2. Few possible causes of the upsurge in deaths due to drug poisoning during the epidemic 
+3. Unknown causes show an increasing trend, about to have the same amount as drug toxicity in 2023. Maybe there are undiscovered factors, that need more investigation in future studies 
+4. Although the number of people who died due to drugs has dropped after the epidemic and is back to normal levels, it is still higher than other factors. What can we do to decrease the drug overdoses?   These four main points I want to talk about in the discussion part, write the discussion for me. Separate each point in a section. Also, for the second point, I've found a paper that explains. Here is the content of that paper "One potential contributor is that avoidance of hospital‐based care was highest during the peak period because of social distancing policies and fears of contracting COVID‐19 [13]. Emerging evidence demonstrates significantly higher rates of refusing transportation to the ED for drug overdoses during the peak period [48, 49]. This is also consistent with the 40%–60% reductions in overall ED visits and hospital admissions observed during the first wave [11, 50]. Relative reductions during the peak period in this study were smaller, but this is likely because many substance‐related emergency department visits are precipitated by medical emergencies rather than discretionary care‐seeking [51]. A second potential contributor is that the unregulated drug supply may have continued to become more toxic as the pandemic progressed, resulting in more severe overdoses for which care could not be deferred [36, 40]. " and"The rise in overdoses before and during the re‐opening period of the pandemic may be attributable, in part, to an increasingly tainted and toxic unregulated drug supply in Ontario and other jurisdictions, with reported contaminants including synthetic opioids and novel benzodiazepines [36, 37]. Recent studies of characteristics of drug overdose deaths occurring just before and during the COVID‐19 pandemic in Rhode Island and Illinois reported many more fatalities because of synthetic opioids such as fentanyl [38, 39]. Usage of high‐potency and adulterated illicit drugs has been further fueled by pandemic‐related disruptions in regular drug supplies and sources across Canada [40]."
+
+ChatGPT
+Discussion
+1. Limitations of Data
+One of the main limitations of the data used in this analysis is the classification of deaths under "Unknown Causes." The increasing trend of unknown causes raises concerns about the accuracy of reporting and potential underestimation of specific causes such as drug toxicity or other health-related issues. Additionally, there may be inconsistencies in how causes of death are recorded, especially within vulnerable populations like the homeless, where access to healthcare and post-mortem investigations may be limited. These gaps in data collection make it difficult to draw fully conclusive results about the exact trends in causes of death over time. More detailed and consistent reporting practices are needed to better capture the true scope of homeless mortality and its causes.
+
+2. Possible Causes of the Upsurge in Drug Poisoning Deaths During the Pandemic
+Several factors likely contributed to the increase in deaths due to drug poisoning during the COVID-19 pandemic. One potential factor is the avoidance of hospital-based care during the peak of the pandemic due to social distancing measures and fears of contracting COVID-19. Studies show that emergency department (ED) visits dropped by 40%–60% during the first wave of the pandemic, and there were higher rates of patients refusing transportation to the ED for drug overdoses. This avoidance of care likely exacerbated the severity of overdoses, as many substance-related emergencies require immediate medical attention, which was delayed or avoided altogether during this period.
+
+Another contributing factor is the increased toxicity of the unregulated drug supply during the pandemic. As regular drug supply chains were disrupted, users turned to more dangerous alternatives, including synthetic opioids like fentanyl and novel benzodiazepines. These substances are more potent and often lead to more severe overdoses. Evidence from Ontario and other jurisdictions suggests that this increasingly tainted drug supply resulted in more fatal overdoses. In summary, a combination of reduced access to emergency care and the worsening quality of street drugs likely drove the surge in drug poisoning deaths during the pandemic.
+
+3. Rising Trend in Unknown Causes
+The data shows a concerning rise in deaths attributed to "Unknown Causes," especially in 2023, when this category is nearly as large as deaths due to drug toxicity. This trend suggests there may be undiscovered or underreported factors contributing to mortality among the homeless population. One possibility is that these deaths are related to the unregulated drug supply but were not properly identified due to gaps in medical reporting. Alternatively, these unknown deaths may reflect other underlying health or environmental factors that have not been thoroughly investigated. More research is needed to uncover the potential causes behind these deaths, as their increasing prevalence indicates that something beyond the already recognized factors, such as drug toxicity, may be affecting the homeless population.
+
+4. Addressing Drug Overdoses After the Pandemic
+Although the number of deaths due to drug toxicity has decreased following the peak of the pandemic, it remains higher than other causes of death. Addressing drug overdoses in the homeless population requires a multifaceted approach. First, expanding access to addiction treatment and harm reduction services is crucial. Safe injection sites, medication-assisted treatment, and outreach programs targeting homeless individuals can help reduce the risk of fatal overdoses. Additionally, efforts to disrupt the supply of highly potent and adulterated drugs, such as fentanyl, need to be strengthened. This could involve improving drug monitoring systems, increasing law enforcement against traffickers of toxic drugs, and promoting safer drug-use alternatives. Finally, increasing public health efforts to educate individuals about the risks of synthetic opioids and ensuring that naloxone is widely available could further help mitigate the impact of drug-related deaths. Collaborative efforts between healthcare providers, community organizations, and policymakers are necessary to bring the rate of drug overdoses down to safer levels.
+
+User
+write code to simulate data in my paper 
+
+ChatGPT
+To simulate data similar to the data in your paper, I will focus on the variables you used in your analysis, such as cause of death, year of death, and total number of deaths. Below is an example code in R that simulates a dataset similar to the one described in your paper.
+
+Simulated Data
+We will simulate data for:
+
+Year of Death (2017 to 2023)
+Cause of Death (e.g., "Drug Toxicity", "Accident", "Cardiovascular Disease", etc.)
+Number of Deaths for each cause per year
+Simulating Data for Your Paper
+r
+Copy code
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Define the years and causes of death
+years <- 2017:2023
+causes <- c("Drug Toxicity", "Accident", "Cancer", "Cardiovascular Disease", "COVID-19", "Homicide", "Infection", "Pneumonia", "Suicide", "Unknown")
+
+# Simulate total number of deaths for each cause in each year
+simulated_data <- expand.grid(year_of_death = years, cause_of_death = causes) %>%
+  mutate(total_deaths = case_when(
+    cause_of_death == "Drug Toxicity" ~ rpois(n(), lambda = 80),  # higher number for drug toxicity
+    cause_of_death == "Accident" ~ rpois(n(), lambda = 15),
+    cause_of_death == "Cancer" ~ rpois(n(), lambda = 10),
+    cause_of_death == "Cardiovascular Disease" ~ rpois(n(), lambda = 20),
+    cause_of_death == "COVID-19" ~ rpois(n(), lambda = 5),  # lower COVID-19 cases
+    cause_of_death == "Homicide" ~ rpois(n(), lambda = 7),
+    cause_of_death == "Infection" ~ rpois(n(), lambda = 3),
+    cause_of_death == "Pneumonia" ~ rpois(n(), lambda = 12),
+    cause_of_death == "Suicide" ~ rpois(n(), lambda = 10),
+    cause_of_death == "Unknown" ~ rpois(n(), lambda = 50)  # higher number for unknown causes
+  ))
+
+# View the first few rows of the simulated data
+head(simulated_data)
+
+# Summarize the data by year and cause of death
+summary_data <- simulated_data %>%
+  group_by(year_of_death, cause_of_death) %>%
+  summarize(total_deaths = sum(total_deaths), .groups = "drop")
+
+# View the summarized data
+print(summary_data)
+Explanation of the Code:
+Years and Causes: We define a range of years (2017-2023) and a set of causes of death based on the variables in your paper.
+Expand Grid: We create all combinations of year and cause of death using expand.grid().
+Simulate Number of Deaths: We simulate the number of deaths for each combination of year and cause of death using the Poisson distribution (rpois()), where the lambda parameter controls the average number of deaths. Higher values for drug toxicity and unknown causes are used to reflect their significance in your analysis.
+Summarize: We group the data by year and cause of death to create a summary table.
+Modifying the Simulation
+You can adjust the lambda values in the rpois() function to match the distribution of deaths more closely to your real data.
+You can further add variables such as season by deriving it from the month of death if needed.
+Let me know if you'd like more adjustments or details!
+
+User
+#### Clean data ####
+
+# for fig 1
+raw_death_by_month_data <- read_csv("~/sta304/starter_folder-main/data/raw_data/raw_data(death by month).csv")
+
+# Clean column names
+death_by_month_data <- raw_death_by_month_data |> 
+  janitor::clean_names()
+
+# Convert the month and year into a proper date format
+cleaned_death_by_month_data <- death_by_month_data |> 
+  mutate(date = ymd(paste(year_of_death, month_of_death, "01", sep = "-"))) |> 
+  arrange(date)
+
+# Remove 'x_id'，'year_of_death' and 'month_of_death' columns
+cleaned_death_by_month_data <- cleaned_death_by_month_data %>%
+  select(date, everything(), -x_id, -year_of_death, -month_of_death)
+
+# Add season information
+cleaned_death_by_month_data <- cleaned_death_by_month_data |> 
+  mutate(season = case_when(
+    month(date) %in% c(12, 1, 2) ~ "Winter",
+    month(date) %in% c(3, 4, 5) ~ "Spring",
+    month(date) %in% c(6, 7, 8) ~ "Summer",
+    month(date) %in% c(9, 10, 11) ~ "Fall"
+  ))
 
 
+# for fig 2
+raw_death_by_cause_data <- read_csv("~/sta304/starter_folder-main/data/raw_data/raw_data(death by cause).csv")
+
+# Clean column names
+death_by_cause_data <- raw_death_by_cause_data |> 
+  janitor::clean_names() %>%
+  mutate(cause_of_death = gsub("Drug toxicity", "Drug Toxicity", cause_of_death))
+
+#  Group the data by cause of death and calculate the number of deaths per cause
+deaths_grouped_by_cause <- death_by_cause_data %>%
+  group_by(cause_of_death) %>%
+  summarise(count = sum(count, na.rm = TRUE))
+
+# Get the number of total death
+total_deaths <- death_by_cause_data %>%
+  summarise(count = sum(count, na.rm = TRUE)) %>%
+  mutate(cause_of_death = "Total")
+total_deaths
+
+# Combine them in a single form contains number of each death cause and the total number of death
+cleaned_death_by_cause_data <- bind_rows(deaths_grouped_by_cause, total_deaths)
+
+#for fig-3
+
+#Filter out unknown death from the cleaned data, then count yearly deaths from 2017-2023
+unknown_deaths <- death_by_cause_data |>
+  filter(cause_of_death == "Unknown") |> 
+  group_by(year_of_death)%>%
+  summarise(yearly_unknown_deaths = sum(count, na.rm = TRUE))
+
+#Filter out drug toxicity caused death from the cleaned data, then count yearly deaths from 2017-2023
+drug_deaths <- death_by_cause_data |>
+  filter(cause_of_death == "Drug Toxicity") |> 
+  group_by(year_of_death)%>%
+  summarise(yearly_drug_toxicity_deaths = sum(count, na.rm = TRUE))
+
+#count yearly total deaths from 2017-2023
+total_deaths_by_year <- death_by_month_data|> 
+  group_by(year_of_death)%>%
+  summarise(yearly_total_deaths = sum(count, na.rm = TRUE))
+
+# Combine the previous three tables
+combined_deaths <- total_deaths_by_year %>%
+  left_join(drug_deaths, by = "year_of_death") %>%
+  left_join(unknown_deaths, by = "year_of_death") 
+combined_deaths
 
 
+#### Save data ####
+write_csv(cleaned_death_by_month_data, "~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_month_data.csv")
+write_csv(cleaned_death_by_cause_data, "~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_cause_data.csv")
+write_csv(death_by_cause_data,"~/sta304/starter_folder-main/data/analysis_data/death_by_cause_data.csv")
+write_csv(combined_deaths,"~/sta304/starter_folder-main/data/analysis_data/deaths_over_time.csv")
+
+how's my comment? improve it
+
+ChatGPT
+Your comments are generally clear and provide a good explanation of the purpose of each section of the code. However, they could be made slightly more detailed to enhance clarity and improve readability. Here’s a refined version of your comments:
+
+r
+Copy code
+#### Clean and Prepare Data ####
+
+# For Figure 1: Cleaning death by month data
+
+# Load raw death data by month
+raw_death_by_month_data <- read_csv("~/sta304/starter_folder-main/data/raw_data/raw_data(death by month).csv")
+
+# Clean column names to follow snake_case convention for easier manipulation
+death_by_month_data <- raw_death_by_month_data |> 
+  janitor::clean_names()
+
+# Convert 'year_of_death' and 'month_of_death' columns into a proper date format using the first day of each month
+cleaned_death_by_month_data <- death_by_month_data |> 
+  mutate(date = ymd(paste(year_of_death, month_of_death, "01", sep = "-"))) |> 
+  arrange(date)  # Arrange the data in chronological order by date
+
+# Remove unnecessary columns 'x_id', 'year_of_death', and 'month_of_death' as they are now redundant after creating the 'date' column
+cleaned_death_by_month_data <- cleaned_death_by_month_data %>%
+  select(date, everything(), -x_id, -year_of_death, -month_of_death)
+
+# Add a 'season' column based on the month of the date, dividing the year into four seasons: Winter, Spring, Summer, Fall
+cleaned_death_by_month_data <- cleaned_death_by_month_data |> 
+  mutate(season = case_when(
+    month(date) %in% c(12, 1, 2) ~ "Winter",
+    month(date) %in% c(3, 4, 5) ~ "Spring",
+    month(date) %in% c(6, 7, 8) ~ "Summer",
+    month(date) %in% c(9, 10, 11) ~ "Fall"
+  ))
+
+# For Figure 2: Cleaning death by cause data
+
+# Load raw death data by cause
+raw_death_by_cause_data <- read_csv("~/sta304/starter_folder-main/data/raw_data/raw_data(death by cause).csv")
+
+# Clean column names and correct the inconsistency in the 'cause_of_death' column ('Drug toxicity' to 'Drug Toxicity')
+death_by_cause_data <- raw_death_by_cause_data |> 
+  janitor::clean_names() %>%
+  mutate(cause_of_death = gsub("Drug toxicity", "Drug Toxicity", cause_of_death))
+
+# Group the data by cause of death and calculate the total number of deaths for each cause
+deaths_grouped_by_cause <- death_by_cause_data %>%
+  group_by(cause_of_death) %>%
+  summarise(count = sum(count, na.rm = TRUE))
+
+# Calculate the total number of deaths (across all causes)
+total_deaths <- death_by_cause_data %>%
+  summarise(count = sum(count, na.rm = TRUE)) %>%
+  mutate(cause_of_death = "Total")
+
+# Combine the grouped cause-specific deaths with the total death count for analysis
+cleaned_death_by_cause_data <- bind_rows(deaths_grouped_by_cause, total_deaths)
+
+# For Figure 3: Yearly death trends
+
+# Filter out deaths caused by unknown factors and calculate yearly totals from 2017 to 2023
+unknown_deaths <- death_by_cause_data |>
+  filter(cause_of_death == "Unknown") |> 
+  group_by(year_of_death) %>%
+  summarise(yearly_unknown_deaths = sum(count, na.rm = TRUE))
+
+# Filter out deaths caused by drug toxicity and calculate yearly totals from 2017 to 2023
+drug_deaths <- death_by_cause_data |>
+  filter(cause_of_death == "Drug Toxicity") |> 
+  group_by(year_of_death) %>%
+  summarise(yearly_drug_toxicity_deaths = sum(count, na.rm = TRUE))
+
+# Calculate the total number of deaths per year from 2017 to 2023, across all causes
+total_deaths_by_year <- death_by_month_data|> 
+  group_by(year_of_death)%>%
+  summarise(yearly_total_deaths = sum(count, na.rm = TRUE))
+
+# Combine yearly total deaths, drug toxicity deaths, and unknown deaths into one table for further analysis
+combined_deaths <- total_deaths_by_year %>%
+  left_join(drug_deaths, by = "year_of_death") %>%
+  left_join(unknown_deaths, by = "year_of_death")
+combined_deaths
 
 
+#### Save Cleaned Data ####
 
+# Save the cleaned death by month data to the analysis folder
+write_csv(cleaned_death_by_month_data, "~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_month_data.csv")
 
+# Save the cleaned death by cause data, including the total number of deaths for each cause
+write_csv(cleaned_death_by_cause_data, "~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_cause_data.csv")
+
+# Save the raw death by cause data (if required for further analysis)
+write_csv(death_by_cause_data,"~/sta304/starter_folder-main/data/analysis_data/death_by_cause_data.csv")
+
+# Save the combined yearly death trends (for use in Figure 3 analysis)
+write_csv(combined_deaths,"~/sta304/starter_folder-main/data/analysis_data/deaths_over_time.csv")
+Key Improvements:
+Clarity: The comments are now more detailed, explaining the purpose of each section in a way that is easier to follow.
+Step-by-step instructions: Each block of code has a clear explanation of why certain transformations or filtering are being performed.
+Relevance: Added some more context to the comments (e.g., specifying the purpose of each cleaning step for the relevant figure).
+Grouping: Grouped comments under logical headers like "Clean and Prepare Data" and "Save Cleaned Data" to make the workflow clearer.
+These changes help ensure that someone unfamiliar with the dataset or project can understand what each step of the code is doing and why.
+
+User
+## Test for negative numbers
+
+## Test for NAs Write test of these two for my simulation data
+
+ChatGPT
+Here’s how to write tests for negative numbers and NAs (missing values) in your simulation data. These tests ensure that your simulated data doesn't contain any negative values (which would be illogical for death counts) or missing values (NAs), which could lead to incorrect analysis.
+
+1. Test for Negative Numbers in Simulated Data
+This test checks if any negative numbers exist in the simulated dataset. Since death counts can't be negative, the test will fail if any negative values are found.
+
+r
+Copy code
+test_that("Simulated data has no negative death counts", {
+  
+  # Ensure that 'total_deaths' column has no negative values
+  expect_true(all(simulated_tibble$total_deaths >= 0), info = "There are negative death counts in the dataset.")
+  
+})
+2. Test for Missing Values (NAs) in Simulated Data
+This test checks if there are any missing values (NAs) in the important columns (year_of_death, cause_of_death, season, and total_deaths).
+
+r
+Copy code
+test_that("Simulated data has no missing values (NAs)", {
+  
+  # Check that no missing values exist in the 'year_of_death' column
+  expect_false(any(is.na(simulated_tibble$year_of_death)), info = "There are NAs in the year_of_death column.")
+  
+  # Check that no missing values exist in the 'cause_of_death' column
+  expect_false(any(is.na(simulated_tibble$cause_of_death)), info = "There are NAs in the cause_of_death column.")
+  
+  # Check that no missing values exist in the 'season' column
+  expect_false(any(is.na(simulated_tibble$season)), info = "There are NAs in the season column.")
+  
+  # Check that no missing values exist in the 'total_deaths' column
+  expect_false(any(is.na(simulated_tibble$total_deaths)), info = "There are NAs in the total_deaths column.")
+  
+})
+3. Running the Tests
+Once you’ve written these tests, you can run them to check for any negative numbers or missing values in your simulation data:
+
+r
+Copy code
+# Example of running the test directly
+test_that("Simulated data has no negative death counts", { 
+  # Negative numbers test code here
+})
+
+test_that("Simulated data has no missing values (NAs)", { 
+  # NAs test code here
+})
+
+# Or, you can save the tests in a file and run them using:
+test_dir("path/to/your/tests")
+Explanation:
+Negative numbers test: This checks that the total_deaths column contains only non-negative values. If a negative number is found, the test will fail and give you the specified message.
+Missing values (NAs) test: This ensures there are no missing values in critical columns (year_of_death, cause_of_death, season, and total_deaths). If any NAs are present, the test will fail with the corresponding error message.
+Let me know if you need further clarification or help!
+
+User
+write same test for my cleaned data
+
+ChatGPT
+Here are the same tests adapted for your cleaned data, which you prepared for the figures. These tests will check for negative numbers and missing values (NAs) in the cleaned datasets.
+
+1. Test for Negative Numbers in Cleaned Data
+Since negative values for death counts don’t make sense, we want to ensure that no negative numbers exist in the relevant columns (count or total_deaths).
+
+Test for cleaned_death_by_month_data
+r
+Copy code
+test_that("cleaned_death_by_month_data has no negative death counts", {
+  
+  # Ensure that no negative death counts exist in any relevant columns
+  expect_true(all(cleaned_death_by_month_data$count >= 0), info = "There are negative death counts in the dataset.")
+  
+})
+Test for cleaned_death_by_cause_data
+r
+Copy code
+test_that("cleaned_death_by_cause_data has no negative death counts", {
+  
+  # Ensure that no negative values exist in the 'count' column
+  expect_true(all(cleaned_death_by_cause_data$count >= 0), info = "There are negative death counts in the dataset.")
+  
+})
+2. Test for Missing Values (NAs) in Cleaned Data
+Here, we check that none of the key columns (date, season, cause_of_death, count, etc.) in your cleaned datasets contain missing values.
+
+Test for cleaned_death_by_month_data
+r
+Copy code
+test_that("cleaned_death_by_month_data has no missing values (NAs)", {
+  
+  # Check that there are no NAs in the 'date' column
+  expect_false(any(is.na(cleaned_death_by_month_data$date)), info = "There are NAs in the date column.")
+  
+  # Check that there are no NAs in the 'season' column
+  expect_false(any(is.na(cleaned_death_by_month_data$season)), info = "There are NAs in the season column.")
+  
+  # Check that there are no NAs in the 'count' column (if count column exists)
+  expect_false(any(is.na(cleaned_death_by_month_data$count)), info = "There are NAs in the count column.")
+  
+})
+Test for cleaned_death_by_cause_data
+r
+Copy code
+test_that("cleaned_death_by_cause_data has no missing values (NAs)", {
+  
+  # Check that there are no NAs in the 'cause_of_death' column
+  expect_false(any(is.na(cleaned_death_by_cause_data$cause_of_death)), info = "There are NAs in the cause_of_death column.")
+  
+  # Check that there are no NAs in the 'count' column
+  expect_false(any(is.na(cleaned_death_by_cause_data$count)), info = "There are NAs in the count column.")
+  
+})
+3. Running the Tests
+After writing these tests, you can run them like before:
+
+r
+Copy code
+# Example for testing negative numbers
+test_that("cleaned_death_by_month_data has no negative death counts", { 
+  # Negative numbers test code here
+})
+
+test_that("cleaned_death_by_month_data has no missing values (NAs)", { 
+  # NAs test code here
+})
+
+# Similarly for other datasets
+Explanation:
+Negative numbers test: This checks if any negative values exist in the death count columns. Since death counts cannot be negative, this ensures data validity.
+Missing values (NAs) test: This ensures that none of the critical columns (such as date, season, cause_of_death, count) contain missing values.
+By running these tests, you'll ensure the cleaned data is free of negative values and missing entries, which is crucial for accurate analysis.
+
+Let me know if you have further questions!
 
 
 
