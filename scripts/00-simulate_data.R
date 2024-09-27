@@ -12,26 +12,36 @@
 library(tidyverse)
 
 
-#### Simulate data ####
-set.seed(304)
+# Set seed for reproducibility
+set.seed(123)
 
-start_date <- as.Date("2018-01-01")
-end_date <- as.Date("2023-12-31")
+# Define the years and causes of death
+years <- 2017:2023
+causes <- c("Drug Toxicity", "Accident", "Cancer", "Cardiovascular Disease", "COVID-19", "Homicide", "Infection", "Pneumonia", "Suicide", "Unknown", "Other")
+seasons <- c("Winter", "Spring", "Summer", "Fall")
 
-number_of_dates <-100
+# Simulate total number of deaths for each cause in each year
+simulated_data <- expand.grid(year_of_death = years, cause_of_death = causes, season = seasons) %>%
+  mutate(total_deaths = case_when(
+    cause_of_death == "Drug Toxicity" ~ rpois(n(), lambda = 80),  # higher number for drug toxicity
+    cause_of_death == "Accident" ~ rpois(n(), lambda = 15),
+    cause_of_death == "Cancer" ~ rpois(n(), lambda = 10),
+    cause_of_death == "Cardiovascular Disease" ~ rpois(n(), lambda = 20),
+    cause_of_death == "COVID-19" ~ rpois(n(), lambda = 5),  # lower COVID-19 cases
+    cause_of_death == "Homicide" ~ rpois(n(), lambda = 7),
+    cause_of_death == "Infection" ~ rpois(n(), lambda = 3),
+    cause_of_death == "Pneumonia" ~ rpois(n(), lambda = 12),
+    cause_of_death == "Suicide" ~ rpois(n(), lambda = 10),
+    cause_of_death == "Other" ~ rpois(n(), lambda = 10),
+    cause_of_death == "Unknown" ~ rpois(n(), lambda = 50)  # higher number for unknown causes
+  ))
 
-data <-
-  tibble(
-    dates = as.Date(runif(
-                      n = number_of_dates, 
-                      min = as.numeric(start_date),
-                      max = as.numeric(end_date)
-                    ),
-                    origin = "1970-01-01"
-                  ),
-                  number_of_marriage = rpois(n = number_of_dates, lambda = 15)
-  )
+# Store the simulated data in a tibble
+simulated_tibble <- as_tibble(simulated_data)
 
-write_csv(data, file = "~/sta304/starter_folder-main/data/raw_data/simulated_data.csv")
+# View the tibble
+print(simulated_tibble)
+
+write_csv(simulated_tibble, file = "~/sta304/starter_folder-main/data/raw_data/simulated_data.csv")
 
 

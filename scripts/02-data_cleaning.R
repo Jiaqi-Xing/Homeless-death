@@ -15,35 +15,27 @@ library(lubridate)
 library(janitor)
 library(ggplot2)
 
-#### Clean data ####
+#### Clean and Prepare Data ####
+
+# For Figure 1: Cleaning death by month data
+
+# Load raw death data by month
 raw_death_by_month_data <- read_csv("~/sta304/starter_folder-main/data/raw_data/raw_data(death by month).csv")
 
-# Clean column names
-cleaned_death_by_month_data <- raw_death_by_month_data |> 
+# Clean column names to follow snake_case convention for easier manipulation
+death_by_month_data <- raw_death_by_month_data |> 
   janitor::clean_names()
 
-# Convert the month and year into a proper date format
-cleaned_death_by_month_data <- cleaned_death_by_month_data |> 
+# Convert 'year_of_death' and 'month_of_death' columns into a proper date format using the first day of each month
+cleaned_death_by_month_data <- death_by_month_data |> 
   mutate(date = ymd(paste(year_of_death, month_of_death, "01", sep = "-"))) |> 
-  arrange(date)
+  arrange(date)  # Arrange the data in chronological order by date
 
-# Remove 'x_id'，'year_of_death' and 'month_of_death' columns
+# Remove unnecessary columns 'x_id', 'year_of_death', and 'month_of_death' as they are now redundant after creating the 'date' column
 cleaned_death_by_month_data <- cleaned_death_by_month_data %>%
   select(date, everything(), -x_id, -year_of_death, -month_of_death)
 
-# Plot monthly death data
-ggplot(cleaned_death_by_month_data, aes(x = date, y = count)) +
-  geom_smooth(method = "loess",            # Add a smooth line
-              se = FALSE,                  # Do not show confidence interval
-              color = "blue", size = 1) + 
-  geom_point(color = "red", size = 1) +  
-  labs(title = "Trends in Homeless Deaths Over Time", 
-       x = "Date", 
-       y = "Number of Deaths") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Add season information
+# Add a 'season' column based on the month of the date, dividing the year into four seasons: Winter, Spring, Summer, Fall
 cleaned_death_by_month_data <- cleaned_death_by_month_data |> 
   mutate(season = case_when(
     month(date) %in% c(12, 1, 2) ~ "Winter",
@@ -52,18 +44,63 @@ cleaned_death_by_month_data <- cleaned_death_by_month_data |>
     month(date) %in% c(9, 10, 11) ~ "Fall"
   ))
 
-# Aggregate deaths by season
-seasonal_deaths <- cleaned_death_by_month_data %>%
-  group_by(season) %>%
-  summarise(total_deaths = sum(count, na.rm = TRUE))
+# For Figure 2: Cleaning death by cause data
 
-# Plot seasonal deaths
-ggplot(seasonal_deaths, aes(x = season, y = total_deaths, fill = season)) +
-  geom_bar(stat = "identity") +
-  geom_text(aes(label = total_deaths), vjust = -0.3, size = 2) + 
-  labs(title = "Total Homeless Deaths by Season", x = "Season", y = "Number of Deaths") +
-  theme_minimal()
+# Load raw death data by cause
+raw_death_by_cause_data <- read_csv("~/sta304/starter_folder-main/data/raw_data/raw_data(death by cause).csv")
 
-#### Save data ####
+# Clean column names and correct the inconsistency in the 'cause_of_death' column ('Drug toxicity' to 'Drug Toxicity')
+death_by_cause_data <- raw_death_by_cause_data |> 
+  janitor::clean_names() %>%
+  mutate(cause_of_death = gsub("Drug toxicity", "Drug Toxicity", cause_of_death))
+
+# Group the data by cause of death and calculate the total number of deaths for each cause
+deaths_grouped_by_cause <- death_by_cause_data %>%
+  group_by(cause_of_death) %>%
+  summarise(count = sum(count, na.rm = TRUE))
+
+# Calculate the total number of deaths (across all causes)
+total_deaths <- death_by_cause_data %>%
+  summarise(count = sum(count, na.rm = TRUE)) %>%
+  mutate(cause_of_death = "Total")
+
+# Combine the grouped cause-specific deaths with the total death count for analysis
+cleaned_death_by_cause_data <- bind_rows(deaths_grouped_by_cause, total_deaths)
+
+# For Figure 3: Yearly death trends
+
+# Filter out deaths caused by unknown factors and calculate yearly totals from 2017 to 2023
+unknown_deaths <- death_by_cause_data |>
+  filter(cause_of_death == "Unknown") |> 
+  group_by(year_of_death) %>%
+  summarise(yearly_unknown_deaths = sum(count, na.rm = TRUE))
+
+# Filter out deaths caused by drug toxicity and calculate yearly totals from 2017 to 2023
+drug_deaths <- death_by_cause_data |>
+  filter(cause_of_death == "Drug Toxicity") |> 
+  group_by(year_of_death) %>%
+  summarise(yearly_drug_toxicity_deaths = sum(count, na.rm = TRUE))
+
+# Calculate the total number of deaths per year from 2017 to 2023, across all causes
+total_deaths_by_year <- death_by_month_data|> 
+  group_by(year_of_death)%>%
+  summarise(yearly_total_deaths = sum(count, na.rm = TRUE))
+
+# Combine yearly total deaths, drug toxicity deaths, and unknown deaths into one table for further analysis
+combined_deaths <- total_deaths_by_year %>%
+  left_join(drug_deaths, by = "year_of_death") %>%
+  left_join(unknown_deaths, by = "year_of_death")
+combined_deaths
+
+
+#### Save Cleaned Data ####
+
+# Save the cleaned death by month data to the analysis folder
 write_csv(cleaned_death_by_month_data, "~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_month_data.csv")
+
+# Save the cleaned death by cause data, including the total number of deaths for each cause
+write_csv(cleaned_death_by_cause_data, "~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_cause_data.csv")
+
+# Save the combined yearly death trends (for use in Figure 3 analysis)
+write_csv(combined_deaths,"~/sta304/starter_folder-main/data/analysis_data/deaths_over_time.csv")
 
