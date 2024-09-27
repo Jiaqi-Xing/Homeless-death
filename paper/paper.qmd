@@ -1,12 +1,11 @@
 ---
-title: "Trends in Toronto Homeless Deaths and Their Underlying Causes"
-subtitle: ""
-author: 
-  Ariel Xing
-thanks: "Code and data are available at: LINK."
+title: "Drug Toxicity as the Leading Cause of Homeless Deaths in Toronto"
+subtitle: "Insights from 2017-2023 Data"
+author: Ariel Xing
+thanks: "Code and data are available at: https://github.com/Jiaqi-Xing/Homeless-death"
 date: today
 date-format: long
-abstract: "Toronto consistently faces a significant population of individuals experiencing homelessness. This study examines the pattern of mortality among this population and the underlying causes of these deaths. The data form Open Data Toronto suggests that three main causes of deaths are seasons, covid-19 and drugs(?). By understanding the factors contributing to these deaths, the government can enhance its capacity to assist and protect the lives of the homeless, safeguard their rights and interests, and promoting social stability."
+abstract: "This study examines the primary causes of homeless deaths in Toronto using the data from Open Data Toronto, covering the period from 2017 to 2023. The findings reveal that seasonal variations in homeless deaths are minimal, with drug toxicity emerging as the leading cause. Surprisingly, the surge in homeless deaths during the COVID-19 pandemic was also driven by an increase in drug use rather than virus itself. Understanding the trends and factors contributing to homeless deaths is critical for guiding public health interventions and improving support services for these vulnerable populations, particularly in addressing the drug overdoses."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -16,186 +15,168 @@ bibliography: references.bib
 #| include: false
 #| warning: false
 #| message: false
-
+library(here)
 library(tidyverse)
-library(palmerpenguins)
+library(opendatatoronto)
+library(knitr)
+library(readr)
+cleaned_death_by_month_data <- read_csv("~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_month_data.csv")
+cleaned_death_by_cause_data <- read_csv("~/sta304/starter_folder-main/data/analysis_data/analysis_death_by_cause_data.csv")
+death_by_cause_data <- read_csv("~/sta304/starter_folder-main/data/analysis_data/death_by_cause_data.csv")
+combined_deaths <- read_csv("~/sta304/starter_folder-main/data/analysis_data/deaths_over_time.csv")
 ```
 
 
 # Introduction
+In 2022, the median age of death for homeless individuals was significantly lower than that of the general population—55 years for males and 42 years for females, compared to 79 and 84 years, respectively [@median_death_age]. This sharp contrast highlights the urgent need to understand the causes and develop effective strategies to reduce mortality within this vulnerable group.
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
+This study examines the factors contributing to the deaths of homeless individuals, including seasonal changes, diseases, and drug use, using data from the “Deaths of People Experiencing Homelessness” dataset (2017–2023) from Open Data Toronto. It also seeks to clarify the misconception that COVID-19 was the primary cause of increased deaths during the pandemic, emphasizing drug toxicity as the leading factor. While many feared that the virus would drive a rise in deaths, the actual increase was largely due to heightened drug use.
 
-The remainder of this paper is structured as follows. @sec-data....
+Drug toxicity was the primary cause of death between 2017 and 2023, accounting for about 58% of known causes. During the pandemic, deaths related to drug use surged, and the underlying reasons for this will be explored later. These findings emphasize the critical need to address substance abuse in homeless populations, particularly during periods of increased isolation and reduced access to social services.
 
+The remainder of this paper is structured as follows: @sec-intro-dataset provides an overview of the raw data set. @ser-variables introduces variables in the cleaned data, and these variables will be used in the visualization. @sec-result presents visualizations of data with explanation of findings from them. Finally, @sec-discussion examines the possible reasons of surge in drug-caused deaths during epidemic, limitations and next steps.
 
+# Data {#sec-data}
 
-# Data {#sec-mydatasection}
+## Introduction to the Dataset {#sec-intro-dataset}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+This paper uses the "Deaths of People Experiencing Homelessness" dataset[@homeless_deaths_data] from Open Data Toronto, covering January 2017 to December 2023. The data is collected by Toronto Public Health (TPH) in collaboration with the Shelter, Support, and Housing Administration (SSHA) and various health service agencies. After homeless people share the information they know about death, these agencies report death information to TPH, with some data verified by the Office of the Chief Coroner of Ontario (OCCO) to ensure accuracy. The dataset consists of three sets: deaths by month, deaths by cause, and deaths by demographics. The first two sets are used in this paper. 
+
+There is another dataset called "Shelter Resident Deaths"[@shelter_deaths_data] available on the Open Data Toronto Portal. Although this dataset tracks homeless deaths over a longer period of time, from 2017 to the present, it focuses solely on demographic information and does not provide valid data on causes of death. Therefore, it was not used for this study, as it does not contribute to our analysis of the primary causes of death.
+
+## Variables in the cleaned Dataset {#sec-variables}
+
+1. **Cause of Death**: The recorded cause of death for homeless individuals from 2017 to 2023 provides insight into the leading contributors to mortality. Its sample space includes nine known causes of death: “accident”, “cancer”, “cardiovascular disease”, “COVID-19”, “drug toxicity”, “homicide”, “infection”, “pneumonia”, and “suicide”; “Unknown” cause for unreported or pending cases; and “other”, which refers to causes of death that can’t be disclosed due to the protection of privacy.
+2. **Total Number of Deaths by Cause**: This variable captures the total count of deaths attributed to each specific cause, allowing for comparisons between different mortality factors.
+3. **Month of Death**: Records the month in which the death occurred. This variable spans from January to December.
+4. **Year of Death**: Records the year in which the death occurred. This data spans from 2017 to 2023. It is used to analyze year-over-year changes in homeless death trends.
+5. **Yearly total deaths**: This variable records the total number of homeless deaths per year from 2017 to 2023.
+6. **Yearly drug toxicity deaths**: This variable records the total number of homeless deaths due to drug toxicity per year from 2017 to 2023.
+7. **Yearly unknown deaths**: This variable records the total number of unknown homeless deaths per year from 2017 to 2023.
+8. **Season**: The "season" variable was constructed by deriving the season from the "month of death" variable to examine whether seasonal factors impact mortality rates. The seasons are classified as follows:
+   - **Spring**: March, April, May
+   - **Summer**: June, July, August
+   - **Fall**: September, October, November
+   - **Winter**: December, January, February
+9. **Total Number of Deaths by Season**: This variable records the total number of deaths in each season, allowing for the identification of any potential seasonal variations in mortality rates.
+
+\newpage
+## Results{#sec-result}
+The visualizations of the cleaned data are presented in this section.
+
+The statistical programming language R [@citeR] was used to obtain, clean, and visualize the data. The raw data was downloaded from the opendatatoronto package [@opendatatoronto]. The tidyverse [@tidyverse], readr [@readr], dplyr [@dplyr], lubridate [@lubridate], and janitor [@janitor] packages were employed for data cleaning, while ggplot2 [@ggplot2] was used for data visualization.
+
+### Seasonal effect on homeless deaths{#sec-seson}
 
 ```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
+#| label: fig-season
+#| fig-cap: Total number of homeless deaths by season from 2017 to 2023
 #| echo: false
+#| fig-pos: "H"
+#| fig-width: 5.3
+#| fig-height: 3.4
+#| warning: false
+#| message: false
+# Ensure the 'season' column follows the desired order
+cleaned_death_by_month_data <- cleaned_death_by_month_data %>%
+  mutate(season = factor(season, levels = c("Spring", "Summer", "Fall", "Winter")))
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
+# Aggregate deaths by season
+seasonal_deaths <- cleaned_death_by_month_data %>%
+  group_by(season) %>%
+  summarise(total_deaths = sum(count, na.rm = TRUE))
+
+# Plot seasonal deaths
+ggplot(seasonal_deaths, aes(x = season, y = total_deaths, fill = season)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = total_deaths), vjust = -0.3, size = 3) + 
+  labs(title = "Total Homeless Deaths by Season", x = "Season", y = "Number of Deaths") +
+  theme_minimal()
+```
+@fig-season displays the total number of homeless deaths by season between 2017 and 2023, There are some variation in deaths across the seasons, though the differences are not substantial. Winter has the highest number of deaths at 266, followed closely by Fall (262) and Summer (255), with Spring having the lowest number of deaths at 239. 
+
+The difference of 27 deaths between Spring (the lowest) and Winter (the highest) suggests that the season may play a role, as the freezing winter months in Toronto is fertal for the homeless people who lack of stable shelter and heating. However, this small difference over six years does not not drastic enough to suggest that the season is the primary cause of death. Therefore,  we need a deeper look into other causes contributing to homeless deaths. 
+
+### Distribution of known homeless causes of death{#sec-cause}
+```{r}
+#| label: fig-cause
+#| fig-cap: Distribution of known homeless causes of death(2017-2023)
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-height: 4.5
+
+#filtered out the row of total number of death
+known_deaths <- cleaned_death_by_cause_data %>%
+  filter(cause_of_death != c("Total"))
+
+ggplot(known_deaths, aes(x = cause_of_death, y = count)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  geom_text(aes(label = count), vjust = -0.5, color = "black", size = 3) +
+  labs(title = "Distribution of Deaths by Cause",
+       x = "Cause of Death",
+       y = "Number of Deaths") +
   theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        plot.title = element_text(size = 10))
 ```
+@fig-cause illustrates the distribution of homeless deaths by cause between 2017 and 2023. The data shows a clear disparity, with Drug Toxicity leading by a significant margin, accounting for 458 deaths, far surpassing all other causes. This underscores the critical impact of substance use on the homeless population. Other notable causes include Cardiovascular Disease (104 deaths), Accident (43 deaths), and Cancer (44 deaths).
 
-Talk more about it.
+The low number of COVID-19-related deaths (8 deaths) and the high number of deaths marked as "Unknown" (225 deaths) are particularly striking. This raises concerns about potential underreporting of COVID-19 as a cause of death, leading to doubts that the virus's impact on the homeless population may have been underestimated. This discrepancy also questions the earlier assertion that the surge in homeless deaths during the pandemic was driven primarily by drug overdoses rather than the virus itself. This concern will be addressed and clarified in the next section.
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
+### Deaths over time{#sec-timeline}
 ```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+#| label: fig-timeline
+#| fig-cap: Trends in Homeless Deaths:Drug Toxicity, Unknown Causes, Total Deaths
 #| echo: false
 #| warning: false
 #| message: false
+#| fig-width: 8
+long_deaths <- combined_deaths %>%
+  pivot_longer(cols = c(yearly_drug_toxicity_deaths, yearly_unknown_deaths, yearly_total_deaths), 
+               names_to = "cause_of_death", 
+               values_to = "total_deaths")
 
-
+# Create the line plot for actual deaths 
+ggplot(long_deaths, aes(x = year_of_death, y = total_deaths, color = cause_of_death, group = cause_of_death)) +
+  geom_line(size = 1.2) +  # Draw the lines
+  geom_point(size = 3) +  # Add points for better visibility
+  labs(title = "Yearly Deaths by Cause Over Time(2017-2023)",
+       x = "Year",
+       y = "Total Deaths",
+       color = "Cause of Death") +  # Label the legend
+  theme_minimal() +
+  scale_color_manual(values = c("yearly_drug_toxicity_deaths" = "blue", 
+                                "yearly_unknown_deaths" = "red",
+                                "yearly_total_deaths" = "green")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        plot.title = element_text(size = 10))
 ```
+@fig-timeline shows the yearly trends in homeless deaths from 2017 to 2023, comparing deaths due to Drug Toxicity, Unknown Causes, and the Total Deaths.
 
-Talk way more about it. 
+The green line (total deaths) and the blue line (deaths due to drug toxicity) follow a similar trend throughout the period. Both rise significantly from 2019, peak in 2021, and then decline. This close correlation suggests that drug toxicity has been a primary driver of the overall mortality trend in the homeless population, especially for the death peak in 2021.
 
+In contrast, the red line (deaths due to unknown causes) shows a different pattern. It keep increasing, and even faster after the pandemic period. This divergence from the total deaths and drug toxicity trends implies that the rise in unknown causes is not simply due to unreported COVID-19 cases, as might be suspected. If COVID-19 deaths had been underreported in this category, we would expect a similar spike in 2020-2021 as seen in the total and drug-related deaths. 
 
-
-# Model
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
-## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
-
-# Results
-
-Our results are summarized in @tbl-modelresults.
-
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
-
-library(rstanarm)
-
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
+Overall, this graph alleviates concerns about COVID-19 deaths being overlooked and demonstrates that drug use was the leading cause of death, driving the surge in mortality during the pandemic.
 
 # Discussion
 
-## First discussion point {#sec-first-point}
+## possible reasons of surge in drug-caused deaths during epidemic {#sec-first-point}
+Two factors likely contributed to the increase in deaths due to drug poisoning during the COVID-19 pandemic. 
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
+First, avoidance of hospital-based care during the peak of the pandemic due to social distancing measures and fears of contracting COVID-19. Studies show that emergency department (ED) visits dropped by 40%–60% during the first wave of the pandemic, and there were higher rates of patients refusing transportation to the ED for drug overdoses[@paper]. This makes people lose the best opportunity to receive treatment after over doses, leading to an increase in the number of deaths.
 
-## Second discussion point
+Another contributing factor is the increased toxicity of the unregulated drug supply during the pandemic. As regular drug supply chains were disrupted, users turned to more dangerous alternatives, including synthetic opioids like fentanyl and novel benzodiazepines. These substances are more potent and often lead to more severe overdoses.[@paper] 
 
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
-
-\newpage
-
-\appendix
-
-# Appendix {-}
+In summary, a combination of reduced access to emergency care and the worsening quality of drugs likely drove the surge in drug poisoning deaths during the pandemic.
 
 
-# Additional data details
+## Limitations and next steps
 
-# Model details {#sec-model-details}
+One of the main limitations of the data used in this analysis is the unknown causes of deaths account for a large proportion of data. The increasing trend of unknown causes of death raises concerns about the accuracy of reporting. In 2023, the number of deaths attributed to unknown causes is even nearly equal to deaths from drug toxicity, the primary cause of deaths so far. This highlights the need for further investigation into these causes. Future research should focus on identifying these unknown factors, as they may point to risks affecting the homeless population that are not yet recognized. 
 
-## Posterior predictive check
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-
-```
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
-
-
+Although the number of people who died due to drugs has dropped after the epidemic and is back to normal levels, it is still higher than other factors. Addressing overdoses among the homeless requires a multi-faceted approach. First, expanding access to addiction treatment, harm reduction services, safe injection sites, and outreach programs can help reduce fatal overdoses. It's also important to disrupt the supply of dangerous drugs like fentanyl through publishing stronger law enforcement to monitor them, and provide safer alternatives. Public health efforts should focus on educating people about the harm of synthetic opioids. Collaboration between healthcare providers, communities, and policymakers is key to reducing overdose deaths.
 
 \newpage
 
