@@ -1,0 +1,13 @@
+cause_of_death,count
+Accident,43
+COVID-19,8
+Cancer,44
+Cardiovascular Disease,104
+Drug Toxicity,458
+Homicide,21
+Infection,10
+Other,50
+Pneumonia,23
+Suicide,30
+Unknown,225
+Total,1016
